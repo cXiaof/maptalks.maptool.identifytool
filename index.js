@@ -1,7 +1,6 @@
 import * as maptalks from 'maptalks'
 
 const options = {
-  draggable: false,
   radiusDefault: 1000,
 }
 
