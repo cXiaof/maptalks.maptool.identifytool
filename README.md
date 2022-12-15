@@ -27,3 +27,61 @@ As a plugin, `maptalks.maptool.identifytool` must be loaded after `maptalks.js` 
 // new IdentifyTool
 const identifyTool = new maptalks.IdentifyTool().addTo(map)
 ```
+
+## API Reference
+
+```javascript
+new maptalks.Autoadsorb(options)
+```
+
+- options **Object** options
+  - radiusDefault **Number** the radius in meters of the initial range, 1000 by default.
+
+`setCenter(coordinate)` set center, map center by default.
+
+## Contributing
+
+We welcome any kind of contributions including issue reportings, pull requests, documentation corrections, feature requests and any other helps.
+
+## Develop
+
+The only source file is `index.js`.
+
+It is written in ES6, transpiled by [babel](https://babeljs.io/) and tested with [mocha](https://mochajs.org) and [expect.js](https://github.com/Automattic/expect.js).
+
+### Scripts
+
+- Install dependencies
+
+```shell
+$ npm install
+```
+
+- Watch source changes and generate runnable bundle repeatedly
+
+```shell
+$ gulp watch
+```
+
+- Package and generate minified bundles to dist directory
+
+```shell
+$ gulp minify
+```
+
+- Lint
+
+```shell
+$ npm run lint
+```
+
+## More Things
+
+- [maptalks.maptool.identifytool](https://github.com/cXiaof/maptalks.maptool.identifytool/issues)
+- [maptalks.autoadsorb](https://github.com/cXiaof/maptalks.autoadsorb/issues)
+- [maptalks.multisuite](https://github.com/cXiaof/maptalks.multisuite/issues)
+- [maptalks.geosplit](https://github.com/cXiaof/maptalks.geosplit/issues)
+- [maptalks.polygonbool](https://github.com/cXiaof/maptalks.polygonbool/issues)
+- [maptalks.geo2img](https://github.com/cXiaof/maptalks.geo2img/issues)
+- [maptalks.control.compass](https://github.com/cXiaof/maptalks.control.compass/issues)
+- [maptalks.autogradual](https://github.com/cXiaof/maptalks.autogradual/issues)

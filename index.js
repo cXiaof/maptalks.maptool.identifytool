@@ -67,6 +67,16 @@ export class IdentifyTool extends maptalks.MapTool {
     if (this._layer) this._layer.remove()
   }
 
+  setCenter(center = this._map.getCenter()) {
+    if (!(center instanceof maptalks.Coordinate)) {
+      center = new maptalks.Coordinate(center)
+    }
+    const lastCenter = this._centerP.getCoordinates()
+    const offsetX = center.x - lastCenter.x
+    const offsetY = center.y - lastCenter.y
+    this._layer.forEach((geo) => geo.translate(offsetX, offsetY))
+  }
+
   _initLayer() {
     this._layer = new maptalks.VectorLayer(layerId).addTo(this._map)
   }

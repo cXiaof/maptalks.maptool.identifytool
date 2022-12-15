@@ -91,6 +91,20 @@ var IdentifyTool = function (_maptalks$MapTool) {
     if (this._layer) this._layer.remove();
   };
 
+  IdentifyTool.prototype.setCenter = function setCenter() {
+    var center = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this._map.getCenter();
+
+    if (!(center instanceof maptalks.Coordinate)) {
+      center = new maptalks.Coordinate(center);
+    }
+    var lastCenter = this._centerP.getCoordinates();
+    var offsetX = center.x - lastCenter.x;
+    var offsetY = center.y - lastCenter.y;
+    this._layer.forEach(function (geo) {
+      return geo.translate(offsetX, offsetY);
+    });
+  };
+
   IdentifyTool.prototype._initLayer = function _initLayer() {
     this._layer = new maptalks.VectorLayer(layerId).addTo(this._map);
   };

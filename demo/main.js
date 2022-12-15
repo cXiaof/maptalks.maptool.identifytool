@@ -23,3 +23,4 @@ new maptalks.CompassControl({
 
 // new IdentifyTool
 const identifyTool = new maptalks.IdentifyTool().addTo(map)
+console.log(identifyTool)

@@ -6,7 +6,7 @@
 /*!
  * requires maptalks@>=1.0.0-rc.1 
  */
-import { Circle, INTERNAL_LAYER_PREFIX, LineString, MapTool, Marker, VectorLayer } from 'maptalks';
+import { Circle, Coordinate, INTERNAL_LAYER_PREFIX, LineString, MapTool, Marker, VectorLayer } from 'maptalks';
 
 function _defaults(obj, defaults) { var keys = Object.getOwnPropertyNames(defaults); for (var i = 0; i < keys.length; i++) { var key = keys[i]; var value = Object.getOwnPropertyDescriptor(defaults, key); if (value && value.configurable && obj[key] === undefined) { Object.defineProperty(obj, key, value); } } return obj; }
 
@@ -85,6 +85,20 @@ var IdentifyTool = function (_maptalks$MapTool) {
 
   IdentifyTool.prototype.onDisable = function onDisable() {
     if (this._layer) this._layer.remove();
+  };
+
+  IdentifyTool.prototype.setCenter = function setCenter() {
+    var center = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this._map.getCenter();
+
+    if (!(center instanceof Coordinate)) {
+      center = new Coordinate(center);
+    }
+    var lastCenter = this._centerP.getCoordinates();
+    var offsetX = center.x - lastCenter.x;
+    var offsetY = center.y - lastCenter.y;
+    this._layer.forEach(function (geo) {
+      return geo.translate(offsetX, offsetY);
+    });
   };
 
   IdentifyTool.prototype._initLayer = function _initLayer() {
