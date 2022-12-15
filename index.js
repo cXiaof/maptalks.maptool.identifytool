@@ -1,11 +1,17 @@
 import * as maptalks from 'maptalks'
 
 const options = {
-  radiusDefault: 1000,
+  autoSubmit: true,
+  layers: [],
+  filter: null,
+  count: null,
+  includeInternals: false,
+  includeInvisible: false,
 }
 
 const layerId = maptalks.INTERNAL_LAYER_PREFIX + '_identify_map_tool'
 const theme = '#2b81ff'
+const radiusDefault = 1000
 
 const centerPSymbol = {
   markerType: 'pin',
@@ -67,6 +73,10 @@ export class IdentifyTool extends maptalks.MapTool {
     if (this._layer) this._layer.remove()
   }
 
+  submit() {
+    console.log('submit')
+  }
+
   setCenter(center = this._map.getCenter()) {
     if (!(center instanceof maptalks.Coordinate)) {
       center = new maptalks.Coordinate(center)
@@ -75,6 +85,14 @@ export class IdentifyTool extends maptalks.MapTool {
     const offsetX = center.x - lastCenter.x
     const offsetY = center.y - lastCenter.y
     this._layer.forEach((geo) => geo.translate(offsetX, offsetY))
+    if (this.options['autoSubmit']) this.submit()
+  }
+
+  setRadius(radius = radiusDefault) {
+    this._range.setRadius(radius)
+    const firstShell = this._range.getShell()[0]
+    this._handleDrag({ coordinate: firstShell })
+    if (this.options['autoSubmit']) this.submit()
   }
 
   _initLayer() {
@@ -83,7 +101,7 @@ export class IdentifyTool extends maptalks.MapTool {
 
   _initRange() {
     const center = this._map.getCenter()
-    this._range = new maptalks.Circle(center, this.options['radiusDefault'], {
+    this._range = new maptalks.Circle(center, radiusDefault, {
       symbol: rangeSymbol,
       numberOfShellPoints: 720,
     })
@@ -95,7 +113,7 @@ export class IdentifyTool extends maptalks.MapTool {
     const firstShell = this._range.getShell()[0]
     this._distance = new maptalks.LineString([center, firstShell], {
       symbol: distanceSymbol,
-      properties: { value: this._calcDistance(this.options['radiusDefault']) },
+      properties: { value: this._calcDistance(radiusDefault) },
     })
     this._distance.on('shapechange', () => {
       const distance = this._distance.getLength()

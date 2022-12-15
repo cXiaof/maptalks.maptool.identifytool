@@ -21,11 +21,17 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : _defaults(subClass, superClass); }
 
 var options = {
-  radiusDefault: 1000
+  autoSubmit: true,
+  layers: [],
+  filter: null,
+  count: null,
+  includeInternals: false,
+  includeInvisible: false
 };
 
 var layerId = maptalks.INTERNAL_LAYER_PREFIX + '_identify_map_tool';
 var theme = '#2b81ff';
+var radiusDefault = 1000;
 
 var centerPSymbol = {
   markerType: 'pin',
@@ -91,6 +97,10 @@ var IdentifyTool = function (_maptalks$MapTool) {
     if (this._layer) this._layer.remove();
   };
 
+  IdentifyTool.prototype.submit = function submit() {
+    console.log('submit');
+  };
+
   IdentifyTool.prototype.setCenter = function setCenter() {
     var center = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this._map.getCenter();
 
@@ -103,6 +113,16 @@ var IdentifyTool = function (_maptalks$MapTool) {
     this._layer.forEach(function (geo) {
       return geo.translate(offsetX, offsetY);
     });
+    if (this.options['autoSubmit']) this.submit();
+  };
+
+  IdentifyTool.prototype.setRadius = function setRadius() {
+    var radius = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : radiusDefault;
+
+    this._range.setRadius(radius);
+    var firstShell = this._range.getShell()[0];
+    this._handleDrag({ coordinate: firstShell });
+    if (this.options['autoSubmit']) this.submit();
   };
 
   IdentifyTool.prototype._initLayer = function _initLayer() {
@@ -111,7 +131,7 @@ var IdentifyTool = function (_maptalks$MapTool) {
 
   IdentifyTool.prototype._initRange = function _initRange() {
     var center = this._map.getCenter();
-    this._range = new maptalks.Circle(center, this.options['radiusDefault'], {
+    this._range = new maptalks.Circle(center, radiusDefault, {
       symbol: rangeSymbol,
       numberOfShellPoints: 720
     });
@@ -125,7 +145,7 @@ var IdentifyTool = function (_maptalks$MapTool) {
     var firstShell = this._range.getShell()[0];
     this._distance = new maptalks.LineString([center, firstShell], {
       symbol: distanceSymbol,
-      properties: { value: this._calcDistance(this.options['radiusDefault']) }
+      properties: { value: this._calcDistance(radiusDefault) }
     });
     this._distance.on('shapechange', function () {
       var distance = _this2._distance.getLength();

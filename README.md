@@ -35,9 +35,16 @@ new maptalks.Autoadsorb(options)
 ```
 
 - options **Object** options
-  - radiusDefault **Number** the radius in meters of the initial range, 1000 by default.
+  - autoSubmit **Boolean** auto submit after dragend/setCenter/setRadius, ture by default.
+  - layers **Array** the layers to perform identify on.
+  - filter **Function** filter function of the result geometries, return false to exclude.
+  - count **Number** limit of the result count.
+  - includeInternals **Boolean** whether to identify internal layers.
+  - includeInvisible **Boolean** whether to identify invisible layers.
 
 `setCenter(coordinate)` set center, map center by default.
+
+`setRadius(radius)` set radius of range, options.radiusDefault by default.
 
 ## Contributing
 
