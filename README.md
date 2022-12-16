@@ -25,7 +25,21 @@ As a plugin, `maptalks.maptool.identifytool` must be loaded after `maptalks.js` 
 
 ```javascript
 // new IdentifyTool
-const identifyTool = new maptalks.IdentifyTool().addTo(map)
+const identifyTool = new maptalks.IdentifyTool({ layers: [layers] })
+// add to map
+identifyTool.addTo(map)
+
+// listening identify event
+identifyTool.on('identify', (e) => {
+  // render identify result
+  renderData(e.data)
+})
+
+// listening rangechange event
+identifyTool.on('rangechange', (e) => {
+  // commit after each range change if you want
+  identifyTool.submit()
+})
 ```
 
 ## API Reference

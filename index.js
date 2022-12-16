@@ -1,3 +1,4 @@
+import booleanDisjoint from '@turf/boolean-disjoint'
 import * as maptalks from 'maptalks'
 
 const options = {
@@ -11,6 +12,7 @@ const options = {
 const layerId = maptalks.INTERNAL_LAYER_PREFIX + '_identify_map_tool'
 const theme = '#2b81ff'
 const radiusDefault = 1000
+const animateDuration = 1000 / 60
 
 const centerPSymbol = {
   markerType: 'pin',
@@ -84,19 +86,33 @@ export class IdentifyTool extends maptalks.MapTool {
   }
 
   setRadius(radius = radiusDefault) {
-    this._range.setRadius(radius)
-    const firstShell = this._range.getShell()[0]
-    this._handleDistChange(firstShell)
-    this._fireRangeChange()
+    this._animateRadius(radius, () => {
+      const firstShell = this._range.getShell()[0]
+      this._handleDistChange(firstShell)
+      this._fireRangeChange()
+    })
   }
 
   submit() {
     const details = this._getFireData()
-    const distance = details.radius
-    console.log(distance)
-    console.log(this._map.distanceToPixel(distance))
-    details.data = []
-    this.fire('identify', details)
+    const distance = this._map.distanceToPixel(details.radius).width
+    this._map.identify(
+      {
+        coordinate: details.center,
+        tolerance: ~~distance,
+        layers: this.options['layers'],
+        filter: this.options['filter'],
+        count: this.options['count'],
+        includeInternals: this.options['includeInternals'],
+        includeInvisible: this.options['includeInvisible'],
+      },
+      (geos) => {
+        details.data = geos.filter(
+          (geo) => !booleanDisjoint(this._range.toGeoJSON(), geo.toGeoJSON()),
+        )
+        this.fire('identify', details)
+      },
+    )
   }
 
   _initLayer() {
@@ -121,9 +137,10 @@ export class IdentifyTool extends maptalks.MapTool {
     })
     this._distance.on('shapechange', () => {
       const distance = this._distance.getLength()
-      this._range.setRadius(distance)
-      this._distance.setProperties({ value: this._calcDistance(distance) })
-      this._distance.setSymbol(distanceSymbol)
+      this._animateRadius(distance, () => {
+        this._distance.setProperties({ value: this._calcDistance(distance) })
+        this._distance.setSymbol(distanceSymbol)
+      })
     })
     this._distance.addTo(this._layer)
   }
@@ -133,6 +150,12 @@ export class IdentifyTool extends maptalks.MapTool {
     if (length <= 1000) return `${length.toFixed(isInt ? 0 : 1)}m`
     length /= 1000
     return `${length.toFixed(2)}km`
+  }
+
+  _animateRadius(radius, callback) {
+    this._range.animate({ radius }, { duration: animateDuration }, (frame) => {
+      if (frame.state.playState === 'finished') callback()
+    })
   }
 
   _initCenterPoint() {

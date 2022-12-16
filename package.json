@@ -32,6 +32,7 @@
     "maptalks": ">=1.0.0-rc.1"
   },
   "dependencies": {
+    "@turf/boolean-disjoint": "^6.5.0"
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
