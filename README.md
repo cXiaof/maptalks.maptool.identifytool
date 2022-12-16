@@ -31,11 +31,10 @@ const identifyTool = new maptalks.IdentifyTool().addTo(map)
 ## API Reference
 
 ```javascript
-new maptalks.Autoadsorb(options)
+new maptalks.IdentifyTool(options)
 ```
 
 - options **Object** options
-  - autoSubmit **Boolean** auto submit after dragend/setCenter/setRadius, ture by default.
   - layers **Array** the layers to perform identify on.
   - filter **Function** filter function of the result geometries, return false to exclude.
   - count **Number** limit of the result count.
@@ -45,6 +44,8 @@ new maptalks.Autoadsorb(options)
 `setCenter(coordinate)` set center, map center by default.
 
 `setRadius(radius)` set radius of range, options.radiusDefault by default.
+
+`submit()` trigger once identify.
 
 ## Contributing
 

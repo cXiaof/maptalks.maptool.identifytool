@@ -17,7 +17,6 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : _defaults(subClass, superClass); }
 
 var options = {
-  autoSubmit: true,
   layers: [],
   filter: null,
   count: null,
@@ -93,10 +92,6 @@ var IdentifyTool = function (_maptalks$MapTool) {
     if (this._layer) this._layer.remove();
   };
 
-  IdentifyTool.prototype.submit = function submit() {
-    console.log('submit');
-  };
-
   IdentifyTool.prototype.setCenter = function setCenter() {
     var center = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this._map.getCenter();
 
@@ -109,7 +104,7 @@ var IdentifyTool = function (_maptalks$MapTool) {
     this._layer.forEach(function (geo) {
       return geo.translate(offsetX, offsetY);
     });
-    if (this.options['autoSubmit']) this.submit();
+    this._fireRangeChange();
   };
 
   IdentifyTool.prototype.setRadius = function setRadius() {
@@ -117,8 +112,17 @@ var IdentifyTool = function (_maptalks$MapTool) {
 
     this._range.setRadius(radius);
     var firstShell = this._range.getShell()[0];
-    this._handleDrag({ coordinate: firstShell });
-    if (this.options['autoSubmit']) this.submit();
+    this._handleDistChange(firstShell);
+    this._fireRangeChange();
+  };
+
+  IdentifyTool.prototype.submit = function submit() {
+    var details = this._getFireData();
+    var distance = details.radius;
+    console.log(distance);
+    console.log(this._map.distanceToPixel(distance));
+    details.data = [];
+    this.fire('identify', details);
   };
 
   IdentifyTool.prototype._initLayer = function _initLayer() {
@@ -166,20 +170,39 @@ var IdentifyTool = function (_maptalks$MapTool) {
   };
 
   IdentifyTool.prototype._initDistancePoint = function _initDistancePoint() {
+    var _this3 = this;
+
     var firstShell = this._range.getShell()[0];
     this._distP = new Marker(firstShell, {
       symbol: distancePSymbol,
       properties: { value: this._distance.getLength() },
       draggable: true
     });
-    this._distP.on('dragging', this._handleDrag.bind(this));
-    this._distP.on('dragend', this._handleDrag.bind(this));
+    this._distP.on('dragging', function (e) {
+      _this3._handleDistChange(e.coordinate);
+    });
+    this._distP.on('dragend', function (e) {
+      _this3._handleDistChange(e.coordinate);
+      _this3._fireRangeChange();
+    });
     this._distP.addTo(this._layer);
   };
 
-  IdentifyTool.prototype._handleDrag = function _handleDrag(e) {
-    this._distance.setCoordinates([this._centerP.getCenter(), e.coordinate]);
+  IdentifyTool.prototype._handleDistChange = function _handleDistChange(lastCoords) {
+    this._distance.setCoordinates([this._centerP.getCenter(), lastCoords]);
     this._distP.setCoordinates(this._distance.getLastCoordinate());
+  };
+
+  IdentifyTool.prototype._fireRangeChange = function _fireRangeChange() {
+    var details = this._getFireData();
+    this.fire('rangechange', details);
+  };
+
+  IdentifyTool.prototype._getFireData = function _getFireData() {
+    var center = this._range.getCenter();
+    var radius = this._range.getRadius();
+    var area = this._range.getArea();
+    return { center: center, radius: radius, area: area };
   };
 
   return IdentifyTool;

@@ -1,7 +1,6 @@
 import * as maptalks from 'maptalks'
 
 const options = {
-  autoSubmit: true,
   layers: [],
   filter: null,
   count: null,
@@ -73,10 +72,6 @@ export class IdentifyTool extends maptalks.MapTool {
     if (this._layer) this._layer.remove()
   }
 
-  submit() {
-    console.log('submit')
-  }
-
   setCenter(center = this._map.getCenter()) {
     if (!(center instanceof maptalks.Coordinate)) {
       center = new maptalks.Coordinate(center)
@@ -85,14 +80,23 @@ export class IdentifyTool extends maptalks.MapTool {
     const offsetX = center.x - lastCenter.x
     const offsetY = center.y - lastCenter.y
     this._layer.forEach((geo) => geo.translate(offsetX, offsetY))
-    if (this.options['autoSubmit']) this.submit()
+    this._fireRangeChange()
   }
 
   setRadius(radius = radiusDefault) {
     this._range.setRadius(radius)
     const firstShell = this._range.getShell()[0]
-    this._handleDrag({ coordinate: firstShell })
-    if (this.options['autoSubmit']) this.submit()
+    this._handleDistChange(firstShell)
+    this._fireRangeChange()
+  }
+
+  submit() {
+    const details = this._getFireData()
+    const distance = details.radius
+    console.log(distance)
+    console.log(this._map.distanceToPixel(distance))
+    details.data = []
+    this.fire('identify', details)
   }
 
   _initLayer() {
@@ -144,14 +148,31 @@ export class IdentifyTool extends maptalks.MapTool {
       properties: { value: this._distance.getLength() },
       draggable: true,
     })
-    this._distP.on('dragging', this._handleDrag.bind(this))
-    this._distP.on('dragend', this._handleDrag.bind(this))
+    this._distP.on('dragging', (e) => {
+      this._handleDistChange(e.coordinate)
+    })
+    this._distP.on('dragend', (e) => {
+      this._handleDistChange(e.coordinate)
+      this._fireRangeChange()
+    })
     this._distP.addTo(this._layer)
   }
 
-  _handleDrag(e) {
-    this._distance.setCoordinates([this._centerP.getCenter(), e.coordinate])
+  _handleDistChange(lastCoords) {
+    this._distance.setCoordinates([this._centerP.getCenter(), lastCoords])
     this._distP.setCoordinates(this._distance.getLastCoordinate())
+  }
+
+  _fireRangeChange() {
+    const details = this._getFireData()
+    this.fire('rangechange', details)
+  }
+
+  _getFireData() {
+    const center = this._range.getCenter()
+    const radius = this._range.getRadius()
+    const area = this._range.getArea()
+    return { center, radius, area }
   }
 }
 

@@ -23,4 +23,10 @@ new maptalks.CompassControl({
 
 // new IdentifyTool
 const identifyTool = new maptalks.IdentifyTool().addTo(map)
-console.log(identifyTool)
+identifyTool.on('rangechange', () => {
+  identifyTool.submit()
+})
+identifyTool.on('identify', (e) => {
+  console.log(e)
+})
+window.iT = identifyTool
